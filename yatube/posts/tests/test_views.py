@@ -134,11 +134,10 @@ class PostPagesTests(TestCase):
                 )
                 for value, expect in form_fields.items():
                     with self.subTest(value=value):
-                        self.assertIsInstance(
-                            response.context
-                                .get('form').fields.get(value),
-                            expect
+                        field_type = (response
+                            .context.get('form').fields.get(value)
                         )
+                        self.assertIsInstance(field_type, expect)
 
 
 # Тестируем работу пагинатора --------------------------------------

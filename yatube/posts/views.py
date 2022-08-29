@@ -138,7 +138,8 @@ def add_comment(request, post_id):
 def comment_delete(request, id):
     comment = get_object_or_404(Comment, id=id)
     if ((request.user == comment.author)
-        or (request.user == comment.post.author)): comment.delete()
+        or (request.user == comment.post.author)):
+            comment.delete()
     return redirect('posts:post_detail', post_id=comment.post.id)
 
 
