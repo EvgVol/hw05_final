@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 
 from .models import Follow, Group, Post, User, Comment
-from .forms import PostForm, СommentForm
+from .forms import PostForm, CommentForm
 from .utils import paginator_posts
 
 
@@ -48,7 +48,7 @@ def profile(request, username):
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     comments = post.comments.all()
-    form = СommentForm()
+    form = CommentForm()
     context = {
         'author': post.author,
         'post': post,
@@ -122,7 +122,7 @@ def add_comment(request, post_id):
         Post,
         pk=post_id,
     )
-    form = СommentForm(request.POST or None)
+    form = CommentForm(request.POST or None)
     if form.is_valid():
         comment = form.save(
             commit=False
