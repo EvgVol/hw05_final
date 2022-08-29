@@ -24,8 +24,10 @@ class PostForm(forms.ModelForm):
 
 class CommentForm(forms.ModelForm):
     """Форма создание комментария."""
-    text = models.TextField('Текст',
-        help_text='Текст нового комментария')
+    text = models.TextField(
+        'Текст',
+        help_text='Текст нового комментария'
+    )
 
     class Meta:
         model = Comment
