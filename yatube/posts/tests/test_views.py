@@ -14,6 +14,7 @@ User = get_user_model()
 POSTS_COUNT = 13
 
 
+# Тестируем работу постов ------------------------------------------
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -52,7 +53,9 @@ class PostPagesTests(TestCase):
     # Проверка главной страницы-------------------------------------
     def test_context_post_in_page_index(self):
         """Шаблон index сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse('posts:index'))
+        response = self.authorized_client.get(
+            reverse('posts:index')
+        )
         self.context_post_and_page(response)
 
     # Проверка страницы группы--------------------------------------
@@ -94,7 +97,9 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('posts:profile', args=(self.user.username,)))
         self.context_post_and_page(response)
-        self.assertEqual(response.context['author'], self.post.author)
+        self.assertEqual(
+            response.context['author'], self.post.author
+        )
 
     # Проверка страницы поста---------------------------------------
     def test_context_post_in_page_post_detail(self):
@@ -134,6 +139,7 @@ class PostPagesTests(TestCase):
                         self.assertIsInstance(field_type, expect)
 
 
+# Тестируем работу пагинатора --------------------------------------
 class PaginatorViewsTest(TestCase):
     """Тестируем работу паджинатора."""
     @classmethod
@@ -193,7 +199,9 @@ class TestComments(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='Test_user')
-        cls.comment_user = User.objects.create_user(username='TestCommentUser')
+        cls.comment_user = User.objects.create_user(
+            username='TestCommentUser'
+        )
         cls.post = Post.objects.create(
             text='БЛА-БЛА-БЛА',
             author=cls.user
@@ -235,6 +243,7 @@ class TestComments(TestCase):
             follow=True)
         Comment.objects.first()
         self.assertEqual(Comment.objects.count(), 0)
+
 
 # Тестируем работу кеша---------------------------------------------
 class TestCache(TestCase):
@@ -280,6 +289,7 @@ class TestCache(TestCase):
         self.assertEqual(
             len(response3.context['page_obj'].object_list), 2)
         cache.clear()
+
 
 # Тестируем подписчиков --------------------------------------------
 class TestFollow(TestCase):

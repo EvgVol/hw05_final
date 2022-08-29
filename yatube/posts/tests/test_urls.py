@@ -13,7 +13,9 @@ class StatusURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create_user(username='test_username')
+        cls.user = User.objects.create_user(
+            username='test_username'
+        )
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test_slug',
@@ -24,7 +26,9 @@ class StatusURLTests(TestCase):
             text='Тестовый тест',
             group=cls.group
         )
-        cls.not_an_author = User.objects.create_user(username='No_author')
+        cls.not_an_author = User.objects.create_user(
+            username='No_author'
+        )
 
         cls.all_pages = (
             (
@@ -84,14 +88,19 @@ class StatusURLTests(TestCase):
                         response.status_code, HTTPStatus.FOUND
                     )
                     self.assertRedirects(
-                        response, f'{redirect_to_login}?next={reverse_name}'
+                        response,
+                        f'{redirect_to_login}?next={reverse_name}'
                     )
                 elif name == reverse(
                         'posts:add_comment', args=(self.post.id)):
                     response = self.client.get(reverse_name)
-                    self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
                     self.assertRedirects(
-                        response, f'{redirect_to_login}?next={reverse_name}')
+                        response,
+                        f'{redirect_to_login}?next={reverse_name}'
+                    )
                 else:
                     response = self.client.get(reverse_name)
                     self.assertEqual(

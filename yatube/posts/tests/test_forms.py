@@ -14,6 +14,7 @@ from ..forms import PostForm
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
 # Проверяем форму создание и редактирование поста-------------------
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateForm(TestCase):
@@ -43,7 +44,6 @@ class PostCreateForm(TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-
 
     def setUp(self):
         self.auth_client = Client()
@@ -111,7 +111,7 @@ class PostCreateForm(TestCase):
     def test_image_post_in_context(self):
         """Пост с изображением правильно передается в словарь."""
         # Post.objects.all().delete
-        small_gif = (            
+        small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
