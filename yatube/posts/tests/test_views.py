@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 from ..models import Comment, Follow, Group, Post
-from ..forms import PostForm, СommentForm
+from ..forms import CommentForm, PostForm
 
 User = get_user_model()
 
@@ -223,7 +223,7 @@ class TestComments(TestCase):
         self.assertContains(response, 'test comment')
         self.assertEqual(Comment.objects.count(), 1)
         self.assertIsInstance(
-            response.context['comment'], СommentForm
+            response.context['comment'], CommentForm
         )
         self.assertIn('comment', response.context)
         self.assertEqual(response.context['comment'], self.post)
