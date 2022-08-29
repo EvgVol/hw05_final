@@ -135,7 +135,8 @@ class PostPagesTests(TestCase):
                 for value, expect in form_fields.items():
                     with self.subTest(value=value):
                         field_type = (response.context
-                            .get('form').fields.get(value))
+                            .get('form').fields.get(value)
+                        )
                         self.assertIsInstance(field_type, expect)
 
 
@@ -228,16 +229,16 @@ class TestComments(TestCase):
         self.assertContains(response, 'test comment')
         self.assertEqual(Comment.objects.count(), 1)
         self.assertIsInstance(
-                    response.context['comment'], СommentForm
-                )
+            response.context['comment'], СommentForm
+        )
         self.assertIn('comment', response.context)
         self.assertEqual(response.context['comment'], self.post)
-    
+
     def test_comment_authorized(self):
         """Проверяем, что неавторизованный пользователь не может
         комментировать.
         """
-        response = self.client.post(
+        self.client.post(
             self.url_comment,
             {'text': 'test comment'},
             follow=True)
@@ -258,7 +259,7 @@ class TestCache(TestCase):
             description='Описание тестовой группы',
         )
         cls.post = Post.objects.create(
-            author=cls.user, 
+            author=cls.user,
             group=cls.group,
             text='text'
         )
@@ -339,13 +340,14 @@ class TestFollow(TestCase):
         """Авторизованный пользователь может
         отписаться от других пользователей.
         """
-        self.authorized_client.get(reverse(
-            'posts:profile_follow', args=(self.user.username,)
+        self.authorized_client.get(
+            reverse('posts:profile_follow',
+                args=(self.user.username,)
             )
         )
-        self.authorized_client.get(reverse(
-            'posts:profile_unfollow',
-            args=(self.user.username,)
+        self.authorized_client.get(
+            reverse('posts:profile_unfollow',
+                args=(self.user.username,)
             )
         )
         self.assertFalse(Follow.objects.exists())
@@ -388,9 +390,9 @@ class TestFollow(TestCase):
     def test_following_self(self):
         """Проверка, что нельзя подписаться на самого себя."""
         self.assertEqual(Follow.objects.all().count(), 0)
-        self.authorized_client.get(reverse(
-            'posts:profile_follow',
-            args=(self.follow_user.username,)
+        self.authorized_client.get(
+            reverse('posts:profile_follow',
+                args=(self.follow_user.username,)
             )
         )
         self.assertEqual(Follow.objects.all().count(), 0)

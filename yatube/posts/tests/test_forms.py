@@ -136,7 +136,7 @@ class PostCreateForm(TestCase):
             ('posts:post_detail', (self.post.id,)),
         )
         for name, args in url_page:
-            with self.subTest(args=args): 
+            with self.subTest(args=args):
                 response = self.client.post(
                     reverse(name, args=args),
                     data=other_form_data,
@@ -148,7 +148,7 @@ class PostCreateForm(TestCase):
             'post',
             'image',
             None,
-            )
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Post.objects.count(), 1)
         self.assertEqual(post.text, self.post.text)

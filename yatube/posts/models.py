@@ -12,6 +12,7 @@ class CreatedModel(models.Model):
         'Дата публикации',
         auto_now_add=True
     )
+
     class Meta:
         abstract = True
 
@@ -81,7 +82,7 @@ class Comment(CreatedModel):
     """Параметры добавления новых комментариев."""
 
     post = models.ForeignKey(
-        Post, 
+        Post,
         on_delete=models.CASCADE,
         verbose_name='Пост',
         related_name="comments"
@@ -128,6 +129,6 @@ class Follow(models.Model):
                 fields=('user', 'author'),
                 name='unique_list'),
         ]
-    
+
     def __str__(self):
         return self.user.name

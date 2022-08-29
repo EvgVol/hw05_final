@@ -137,9 +137,8 @@ def add_comment(request, post_id):
 @login_required
 def comment_delete(request, id):
     comment = get_object_or_404(Comment, id=id)
-    if ((request.user == comment.author) 
-        or (request.user == comment.post.author)):
-            comment.delete()
+    if ((request.user == comment.author)
+        or (request.user == comment.post.author)): comment.delete()
     return redirect('posts:post_detail', post_id=comment.post.id)
 
 
@@ -149,7 +148,8 @@ def follow_index(request):
     post_list = Post.objects.filter(
         author__following__user=request.user
     )
-    context = {'page_obj': paginator_posts(request, post_list),
+    context = {
+        'page_obj': paginator_posts(request, post_list),
     }
     return render(request, 'posts/follow.html', context)
 
