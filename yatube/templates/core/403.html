@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Ошибка 403{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    <h1>Custom CSRF check error. 403</h1>
+    <p>К сожалению, вы пытались попасть на страницу
+       к которой у вас нет доступа.</p>
+    <a href="{% url 'posts:index' %}">Перейти на главную</a>
+  </div>
+{% endblock %}

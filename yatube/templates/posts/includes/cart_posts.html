@@ -1,0 +1,61 @@
+<article >
+  {% load thumbnail %}
+  <ul 
+    class="card-header"
+    style=" 
+      display: flex;
+      justify-content:space-between;">
+      <li style="list-style:none;">
+        Автор:
+          {% if not author %}
+            <a 
+              href="{% url 'posts:profile' post.author.username %}"
+              style="text-decoration: none; color: #0d6efd; font-style: italic; ">
+                @{{ post.author }}
+            </a>
+          {% else %}
+            {{ author.get_full_name }}
+          {% endif %}
+      </li>
+      <li style="list-style:none;">
+      Дата публикации: <span style="color: #0d6efd; font-style: italic; "> {{ post.pub_date|date:"d E Y"  }} </span>
+    </li>
+  </ul>
+  {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+    <img class="card-img my-2" src="{{ im.url }}">
+  {% endthumbnail %}
+  <p>
+    {{ post.text|linebreaks }}
+  </p>
+  
+  <div style="display: flex; justify-content:space-between; align-items: flex-end;">
+    <div>
+      {% if not group %}
+        {% if post.group %}
+          <a 
+            class="justify-content-md"
+            style="
+              color: grey;
+              font-style: italic;
+              text-decoration: none;"
+            href="{% url 'posts:group_list' post.group.slug %}">
+              <span> # {{ post.group.title }}
+          </a>
+        {% else %}
+          <span style='color: red'>Этой публикации нет ни в одной группе.</span>
+        {% endif %}
+      {% endif %}
+    </div>
+    <button class="btn btn-primary" type="button">
+      <a 
+        href="{% url 'posts:post_detail' post.pk %}"
+        style="
+          color: white;
+          font-style: bold;
+          text-decoration: none;">
+          Подробнее 
+      </a>
+    </button>
+  </div>
+  {% if not forloop.last %}<hr>{% endif %}
+</article>

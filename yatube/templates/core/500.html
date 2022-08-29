@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Ошибка 500{% endblock %}
+{% block content %}
+    <h1>Ошибка 500</h1>
+    <p class="lead">Ошибка на сервере, не пережимайте, скоро всё исправим.</p>
+    <p class="lead"><a href={% url 'posts:index' %}>Перейти на главную</a></p>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Последние обновления на сайте{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    {% load cache %}
+    <h1>Последние обновления на сайте</h1>
+    {% include "posts/includes/switcher.html" with follow=True %}
+    {% include 'posts/includes/paginator.html' %}
+    {% for post in page_obj %}
+        {% include 'posts/includes/cart_posts.html' with post=post %}
+    {% endfor %}
+    {% include 'posts/includes/paginator.html' %}
+  </div>
+{% endblock %}
