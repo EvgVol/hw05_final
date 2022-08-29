@@ -4,7 +4,6 @@ from django.db import models
 from .models import Post, Comment
 
 
-# Форма создание постов --------------------------------------------
 class PostForm(forms.ModelForm):
     """Форма создание поста."""
 
@@ -23,10 +22,10 @@ class PostForm(forms.ModelForm):
         }
 
 
-# Форма создания комментария ---------------------------------------
-class СommentForm(forms.ModelForm):
+class CommentForm(forms.ModelForm):
     """Форма создание комментария."""
-    text = models.TextField('Текст', help_text='Текст нового комментария')
+    text = models.TextField('Текст',
+        help_text='Текст нового комментария')
 
     class Meta:
         model = Comment
