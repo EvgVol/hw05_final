@@ -134,8 +134,8 @@ class PostPagesTests(TestCase):
                 )
                 for value, expect in form_fields.items():
                     with self.subTest(value=value):
-                        field_type = (response
-                            .context.get('form').fields.get(value)
+                        field_type = (response.context.get('form')
+                            .fields.get(value)
                         )
                         self.assertIsInstance(field_type, expect)
 
