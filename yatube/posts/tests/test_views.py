@@ -134,10 +134,11 @@ class PostPagesTests(TestCase):
                 )
                 for value, expect in form_fields.items():
                     with self.subTest(value=value):
-                        field_type = (response.context
-                            .get('form').fields.get(value)
+                        self.assertIsInstance(
+                            response.context
+                                .get('form').fields.get(value),
+                            expect
                         )
-                        self.assertIsInstance(field_type, expect)
 
 
 # Тестируем работу пагинатора --------------------------------------
@@ -341,12 +342,14 @@ class TestFollow(TestCase):
         отписаться от других пользователей.
         """
         self.authorized_client.get(
-            reverse('posts:profile_follow',
+            reverse(
+                'posts:profile_follow',
                 args=(self.user.username,)
             )
         )
         self.authorized_client.get(
-            reverse('posts:profile_unfollow',
+            reverse(
+                'posts:profile_unfollow',
                 args=(self.user.username,)
             )
         )
@@ -391,7 +394,8 @@ class TestFollow(TestCase):
         """Проверка, что нельзя подписаться на самого себя."""
         self.assertEqual(Follow.objects.all().count(), 0)
         self.authorized_client.get(
-            reverse('posts:profile_follow',
+            reverse(
+                'posts:profile_follow',
                 args=(self.follow_user.username,)
             )
         )
