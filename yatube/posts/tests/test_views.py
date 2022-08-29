@@ -14,7 +14,6 @@ User = get_user_model()
 POSTS_COUNT = 13
 
 
-# Тестируем работу постов ------------------------------------------
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -37,7 +36,6 @@ class PostPagesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.post.author)
 
-    # Внешняя переменная--------------------------------------------
     def context_post_and_page(self, response, flag=False):
         """Проверка поста на странице."""
         if flag is True:
@@ -50,7 +48,6 @@ class PostPagesTests(TestCase):
         self.assertEqual(post.pub_date, self.post.pub_date)
         self.assertEqual(post.id, self.post.id)
 
-    # Проверка главной страницы-------------------------------------
     def test_context_post_in_page_index(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_client.get(
@@ -58,7 +55,6 @@ class PostPagesTests(TestCase):
         )
         self.context_post_and_page(response)
 
-    # Проверка страницы группы--------------------------------------
     def test_context_post_in_page_group(self):
         """Шаблон group_list сформирован с правильным контекстом
         отфильтрованных по группе.
@@ -70,7 +66,6 @@ class PostPagesTests(TestCase):
         self.assertEqual(group.title, self.group.title)
         self.assertEqual(response.context['group'], self.group)
 
-    # Проверка,что пост не попал в не нужную группу-----------------
     def test_post_not_used_in_other_group(self):
         """Пост не используется в чужой группе."""
         Post.objects.all().delete()
@@ -91,7 +86,6 @@ class PostPagesTests(TestCase):
             reverse('posts:group_list', args=(self.group.slug,)))
         self.assertEqual(len(response.context['page_obj']), 1)
 
-    # Проверка страницы профиля-------------------------------------
     def test_context_post_in_page_profile(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.authorized_client.get(
@@ -101,7 +95,6 @@ class PostPagesTests(TestCase):
             response.context['author'], self.post.author
         )
 
-    # Проверка страницы поста---------------------------------------
     def test_context_post_in_page_post_detail(self):
         """Шаблон post_detail сформирован
         с правильным контекстом.
@@ -110,7 +103,6 @@ class PostPagesTests(TestCase):
             reverse('posts:post_detail', args=(self.post.id,)))
         self.context_post_and_page(response, True)
 
-    # Проверка страницы создание и редактирование поста-------------
     def test_context_post_in_page_edit_and_create_post(self):
         """Шаблон create_post сформирован с
         правильным контекстом.
@@ -144,7 +136,6 @@ class PostPagesTests(TestCase):
                         self.assertIsInstance(field_type, expect)
 
 
-# Тестируем работу пагинатора --------------------------------------
 class PaginatorViewsTest(TestCase):
     """Тестируем работу паджинатора."""
     @classmethod
@@ -198,7 +189,6 @@ class PaginatorViewsTest(TestCase):
                                 .object_list), count_posts)
 
 
-# Тестируем работу создания комментария ----------------------------
 class TestComments(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -250,7 +240,6 @@ class TestComments(TestCase):
         self.assertEqual(Comment.objects.count(), 0)
 
 
-# Тестируем работу кеша---------------------------------------------
 class TestCache(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -270,7 +259,6 @@ class TestCache(TestCase):
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
-    # Главная страница ---------------------------------------------
     def test_cache_index(self):
         """Главная страница работает с 20 секундным кешем."""
         response = self.authorized_client.get(
@@ -296,7 +284,6 @@ class TestCache(TestCase):
         cache.clear()
 
 
-# Тестируем подписчиков --------------------------------------------
 class TestFollow(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -314,7 +301,6 @@ class TestFollow(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.follow_user)
 
-    # Тест подписки ------------------------------------------------
     def test_follow(self):
         """Авторизованный пользователь может
         подписываться на других пользователей.
@@ -339,7 +325,6 @@ class TestFollow(TestCase):
         self.assertEqual(follow.user, self.follow_user)
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
-    # Тест отписки -------------------------------------------------
     def test_unfollow(self):
         """Авторизованный пользователь может
         отписаться от других пользователей.
@@ -358,7 +343,6 @@ class TestFollow(TestCase):
         )
         self.assertFalse(Follow.objects.exists())
 
-    # Посты показываются у подписанта ------------------------------
     def test_follow_index(self):
         """Новая запись пользователя появляется в ленте фаловера."""
         Post.objects.create(
@@ -376,7 +360,6 @@ class TestFollow(TestCase):
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.group.id, self.group.id)
 
-    # Новые посты не показываются у фаловера -----------------------
     def test_not_follow_index(self):
         """Новая запись пользователя не появляется в ленте
         не фаловера.
@@ -392,7 +375,6 @@ class TestFollow(TestCase):
             response.context.get('page_obj').object_list), 0
         )
 
-    # На себя нельзя подписаться -----------------------------------
     def test_following_self(self):
         """Проверка, что нельзя подписаться на самого себя."""
         self.assertEqual(Follow.objects.all().count(), 0)

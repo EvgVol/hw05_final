@@ -15,7 +15,6 @@ User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
-# Проверяем форму создание и редактирование поста-------------------
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateForm(TestCase):
     """Проверка формы со странице создания поста."""
@@ -49,7 +48,6 @@ class PostCreateForm(TestCase):
         self.auth_client = Client()
         self.auth_client.force_login(self.user)
 
-    # Анонимный пользователь----------------------------------------
     def test_guest_cant_create_post(self):
         """Гостевой пользователь
         не может создавать посты.
@@ -63,7 +61,6 @@ class PostCreateForm(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertEqual(Post.objects.count(), 0)
 
-    # Авторизованный пользователь-----------------------------------
     def test_check_send_form_post(self):
         """Проверка создание поста авторизованным пользователем."""
         Post.objects.all().delete()
@@ -110,7 +107,6 @@ class PostCreateForm(TestCase):
 
     def test_image_post_in_context(self):
         """Пост с изображением правильно передается в словарь."""
-        # Post.objects.all().delete
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
