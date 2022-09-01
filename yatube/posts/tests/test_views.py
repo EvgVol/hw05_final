@@ -163,8 +163,8 @@ class PaginatorViewsTest(TestCase):
             username="test_follower",
         )
         cls.following = Follow.objects.create(
-            user = cls.follower,
-            author = cls.author,
+            user=cls.follower,
+            author=cls.author,
         )
 
         Post.objects.bulk_create(cls.posts)
@@ -285,7 +285,7 @@ class TestCache(TestCase):
 
     def test_cache_index(self):
         """Главная страница работает с 20 секундным кешем."""
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse('posts:index')
         )
         Post.objects.create(
@@ -320,8 +320,8 @@ class TestFollow(TestCase):
         cls.follower = User.objects.create_user(
             username='Test_user')
         cls.following = Follow.objects.create(
-            user = cls.follower,
-            author = cls.user,
+            user=cls.follower,
+            author=cls.user,
         )
 
     def setUp(self):
@@ -392,7 +392,7 @@ class TestFollow(TestCase):
         """
         Post.objects.all().delete
         new_user = User.objects.create_user(
-            username = 'new_user'
+            username='new_user'
         )
         Post.objects.create(
             author=new_user,

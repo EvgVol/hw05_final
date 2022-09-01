@@ -158,20 +158,20 @@ class StatusURLTests(TestCase):
                         response, redirect_to_post_detail
                     )
                 elif name == 'posts:add_comment':
-                        response = self.not_author.get(reverse_name)
-                        self.assertEqual(
-                            response.status_code, HTTPStatus.FOUND
-                        )
+                    response = self.not_author.get(reverse_name)
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
                 elif name == 'posts:profile_follow':
-                        response = self.not_author.get(reverse_name)
-                        self.assertEqual(
-                            response.status_code, HTTPStatus.FOUND
-                        )
+                    response = self.not_author.get(reverse_name)
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
                 elif name == 'posts:profile_unfollow':
-                        response = self.not_author.get(reverse_name)
-                        self.assertEqual(
-                            response.status_code, HTTPStatus.FOUND
-                        )
+                    response = self.not_author.get(reverse_name)
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
                 else:
                     response = self.not_author.get(reverse_name)
                     self.assertEqual(
