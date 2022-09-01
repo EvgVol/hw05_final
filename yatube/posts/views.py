@@ -35,7 +35,8 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     post_list = author.posts.select_related('group').all()
     following = request.user.is_authenticated and (
-        Follow.objects.filter(user=request.user, author=author).exists())
+        author.following.exists()
+    )
     context = {
         'author': author,
         'page_obj': paginator_posts(request, post_list),
@@ -46,14 +47,16 @@ def profile(request, username):
 
 # Страница поста ---------------------------------------------------
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
-    comments = post.comments.all()
-    form = CommentForm()
+    post = get_object_or_404(
+        Post.objects.prefetch_related('comments__author'),
+        pk=post_id
+    )
+
     context = {
         'author': post.author,
         'post': post,
-        'form': form,
-        'comments': comments,
+        'form': CommentForm(),
+        'comments': post.comments.all(),
     }
     return render(request, 'posts/post_detail.html', context)
 
@@ -85,10 +88,10 @@ def post_delete(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if request.user == post.author:
         post.delete()
-        return redirect(
-            'profile:profile',
-            username=request.user
-        )
+    return redirect(
+        'profile:profile',
+        username=request.user
+    )
 
 
 # Страница редактирование поста ------------------------------------
@@ -115,7 +118,7 @@ def post_edit(request, post_id):
     )
 
 
-# Страница добавление поста ----------------------------------------
+# Добавляем комментарий к посту ------------------------------------
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(
@@ -137,10 +140,8 @@ def add_comment(request, post_id):
 @login_required
 def comment_delete(request, id):
     comment = get_object_or_404(Comment, id=id)
-    a_comment = comment.author
-    a_p_comment = comment.post.author
     user = request.user
-    if ((user == a_comment) or (user == a_p_comment)):
+    if ((user == comment.author) or (user == comment.post.author)):
         comment.delete()
     return redirect('posts:post_detail', post_id=comment.post.id)
 
@@ -148,9 +149,8 @@ def comment_delete(request, id):
 # страница follow --------------------------------------------------
 @login_required
 def follow_index(request):
-    post_list = Post.objects.filter(
-        author__following__user=request.user
-    )
+    authors = request.user.follower.values_list('author', flat=True)
+    post_list = Post.objects.filter(author__id__in=authors)
     context = {
         'page_obj': paginator_posts(request, post_list),
     }
@@ -173,7 +173,6 @@ def profile_follow(request, username):
 # Отписаться на автора----------------------------------------------
 @login_required
 def profile_unfollow(request, username):
-    following = get_object_or_404(User, username=username)
-    follower = request.user
-    Follow.objects.filter(user=follower, author=following).delete()
+    get_object_or_404(User, username=username)
+    Follow.objects.filter(author__username=username).delete()
     return redirect('posts:profile', username=username)

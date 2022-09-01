@@ -5,7 +5,8 @@
     {% load cache %}
     <h1>Последние обновления на сайте</h1>
     {% include 'posts/includes/paginator.html' %}
-    {% cache 20 index_page %}
+    {% include 'posts/includes/switcher.html' %}
+    {% cache 30 sidebar index page_obj.number %}
       {% for post in page_obj %}
         {% include 'posts/includes/cart_posts.html' %}
       {% endfor %}

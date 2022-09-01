@@ -61,6 +61,27 @@ class StatusURLTests(TestCase):
                 (cls.post.id,),
                 f'/posts/{cls.post.id}/edit/',
             ),
+            (
+                'posts:add_comment',
+                (cls.post.id,),
+                f'/posts/{cls.post.id}/comment/',
+            ),
+            (
+                'posts:follow_index',
+                None,
+                '/follow/',
+            ),
+            (
+                'posts:profile_follow',
+                (cls.user.username,),
+                f'/profile/{cls.user.username}/follow/',
+            ),
+            (
+                'posts:profile_unfollow',
+                (cls.user.username,),
+                f'/profile/{cls.user.username}/unfollow/',
+            ),
+
         )
 
     def setUp(self):
@@ -136,6 +157,21 @@ class StatusURLTests(TestCase):
                     self.assertRedirects(
                         response, redirect_to_post_detail
                     )
+                elif name == 'posts:add_comment':
+                        response = self.not_author.get(reverse_name)
+                        self.assertEqual(
+                            response.status_code, HTTPStatus.FOUND
+                        )
+                elif name == 'posts:profile_follow':
+                        response = self.not_author.get(reverse_name)
+                        self.assertEqual(
+                            response.status_code, HTTPStatus.FOUND
+                        )
+                elif name == 'posts:profile_unfollow':
+                        response = self.not_author.get(reverse_name)
+                        self.assertEqual(
+                            response.status_code, HTTPStatus.FOUND
+                        )
                 else:
                     response = self.not_author.get(reverse_name)
                     self.assertEqual(
@@ -174,6 +210,11 @@ class StatusURLTests(TestCase):
                 ('posts:post_edit'),
                 (self.post.id,),
                 ('posts/create_post.html')
+            ),
+            (
+                ('posts:follow_index'),
+                None,
+                ('posts/follow.html')
             ),
         )
         for name, args, template in template_all_pages:

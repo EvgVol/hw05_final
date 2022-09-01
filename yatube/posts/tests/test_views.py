@@ -47,6 +47,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(post.group, self.post.group)
         self.assertEqual(post.pub_date, self.post.pub_date)
         self.assertEqual(post.id, self.post.id)
+        self.assertEqual(post.image, self.post.image)
 
     def test_context_post_in_page_index(self):
         """Шаблон index сформирован с правильным контекстом."""
@@ -158,6 +159,14 @@ class PaginatorViewsTest(TestCase):
             )
             for post in range(POSTS_COUNT)
         ]
+        cls.follower = User.objects.create_user(
+            username="test_follower",
+        )
+        cls.following = Follow.objects.create(
+            user = cls.follower,
+            author = cls.author,
+        )
+
         Post.objects.bulk_create(cls.posts)
         cls.all_pages_with_paginator = (
             ('posts:index', None),
@@ -170,12 +179,12 @@ class PaginatorViewsTest(TestCase):
         )
 
     def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.follower_client = Client()
+        self.follower_client.force_login(self.follower)
 
     def test_paginator_on_page(self):
         """Паджинатор показывает по 10 постов на страницах
-        index, group_list, profile.
+        index, group_list, profile, follow_index
         """
         for name, args in self.all_pages_with_paginator:
             with self.subTest(args=args):
@@ -188,6 +197,16 @@ class PaginatorViewsTest(TestCase):
                             len(response.context.get('page_obj')
                                 .object_list), count_posts)
 
+        for num_page, count_posts in self.lot_post:
+            with self.subTest(num_page=num_page):
+                response = self.follower_client.get(
+                    reverse('posts:follow_index', None) + num_page
+                )
+                self.assertEqual(
+                    len(response.context.get('page_obj')
+                        .object_list), count_posts
+                )
+
 
 class TestComments(TestCase):
     @classmethod
@@ -199,7 +218,7 @@ class TestComments(TestCase):
         )
         cls.post = Post.objects.create(
             text='БЛА-БЛА-БЛА',
-            author=cls.user
+            author=cls.user,
         )
         cls.url_comment = reverse(
             'posts:add_comment',
@@ -227,6 +246,9 @@ class TestComments(TestCase):
         )
         self.assertIn('comment', response.context)
         self.assertEqual(response.context['comment'], self.post)
+        self.assertEqual(response.context['text'], self.post)
+        self.assertEqual(response.context['author'], self.post)
+        self.assertEqual(response.context['post'], self.post)
 
     def test_comment_authorized(self):
         """Проверяем, что неавторизованный пользователь не может
@@ -256,8 +278,10 @@ class TestCache(TestCase):
             group=cls.group,
             text='text'
         )
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
     def test_cache_index(self):
         """Главная страница работает с 20 секундным кешем."""
@@ -271,17 +295,16 @@ class TestCache(TestCase):
         response1 = self.authorized_client.get(
             reverse('posts:index')
         )
-        self.assertEqual(response.content, response1.content)
+        Post.objects.all().delete()
+        response2 = self.authorized_client.get(
+            reverse('posts:index')
+        )
+        self.assertEqual(response1.content, response2.content)
         cache.clear()
         response3 = self.authorized_client.get(
             reverse('posts:index')
         )
-        self.assertNotEqual(response3.content, response1.content)
-        self.assertEqual(response3.context['page_obj'][0].text,
-                         'текст 1')
-        self.assertEqual(
-            len(response3.context['page_obj'].object_list), 2)
-        cache.clear()
+        self.assertNotEqual(response1.content, response3.content)
 
 
 class TestFollow(TestCase):
@@ -294,21 +317,26 @@ class TestFollow(TestCase):
             slug='test_slug',
             description='Test description'
         )
-        cls.follow_user = User.objects.create_user(
+        cls.follower = User.objects.create_user(
             username='Test_user')
+        cls.following = Follow.objects.create(
+            user = cls.follower,
+            author = cls.user,
+        )
 
     def setUp(self):
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.follow_user)
+        self.authorized_client.force_login(self.follower)
 
     def test_follow(self):
         """Авторизованный пользователь может
         подписываться на других пользователей.
         """
+        Follow.objects.all().delete()
         follow_count1 = Follow.objects.count()
         follow = Follow.objects.filter(
             author=self.user,
-            user=self.follow_user
+            user=self.follower
         )
         self.assertEqual(follow.first(), None)
         response = self.authorized_client.get(
@@ -322,50 +350,52 @@ class TestFollow(TestCase):
         follow = Follow.objects.first()
         self.assertEqual(Follow.objects.count(), 1)
         self.assertEqual(follow.author, self.user)
-        self.assertEqual(follow.user, self.follow_user)
+        self.assertEqual(follow.user, self.follower)
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_unfollow(self):
         """Авторизованный пользователь может
         отписаться от других пользователей.
         """
-        self.authorized_client.get(
-            reverse(
-                'posts:profile_follow',
-                args=(self.user.username,)
-            )
-        )
+        self.assertEqual(self.user.following.count(), 1)
         self.authorized_client.get(
             reverse(
                 'posts:profile_unfollow',
                 args=(self.user.username,)
             )
         )
-        self.assertFalse(Follow.objects.exists())
+        self.assertEqual(self.user.following.count(), 0)
 
     def test_follow_index(self):
         """Новая запись пользователя появляется в ленте фаловера."""
-        Post.objects.create(
+        Post.objects.all().delete()
+        self.assertEqual(Post.objects.count(), 0)
+        new_post = Post.objects.create(
             author=self.user,
-            text='Кря-кря',
-            group=self.group
+            text='Новый пост'
         )
         self.authorized_client.get(reverse(
             'posts:profile_follow', args=(self.user.username,)))
         response = self.authorized_client.get(reverse(
             'posts:follow_index')
         )
+        self.assertEqual(len(
+            response.context.get('page_obj').object_list), 1
+        )
         post = response.context['post']
-        self.assertEqual(post.text, 'Кря-кря')
-        self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group.id, self.group.id)
+        self.assertEqual(post.text, new_post.text)
+        self.assertEqual(post.author, new_post.author)
 
     def test_not_follow_index(self):
         """Новая запись пользователя не появляется в ленте
         не фаловера.
         """
+        Post.objects.all().delete
+        new_user = User.objects.create_user(
+            username = 'new_user'
+        )
         Post.objects.create(
-            author=self.user,
+            author=new_user,
             text='Просто текст',
             group=self.group)
         response = self.authorized_client.get(
@@ -377,11 +407,13 @@ class TestFollow(TestCase):
 
     def test_following_self(self):
         """Проверка, что нельзя подписаться на самого себя."""
+        Follow.objects.all().delete()
         self.assertEqual(Follow.objects.all().count(), 0)
+
         self.authorized_client.get(
             reverse(
                 'posts:profile_follow',
-                args=(self.follow_user.username,)
+                args=(self.follower.username,)
             )
         )
         self.assertEqual(Follow.objects.all().count(), 0)
