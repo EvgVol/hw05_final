@@ -91,9 +91,6 @@ class Comment(CreatedModel):
         verbose_name_plural = 'Комментарии'
         default_related_name = "comments"
 
-    def __str__(self):
-        return self.text
-
 
 class Follow(models.Model):
     """Параметры добавления новых подписок."""

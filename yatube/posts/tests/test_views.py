@@ -225,9 +225,10 @@ class TestComments(TestCase):
         комментировать.
         """
         Comment.objects.all().delete()
+        data = {'text': 'test comment'}
         response = self.authorized_client.post(
             self.url_comment,
-            {'text': 'test comment'},
+            data,
             follow=True)
         comment_one = Comment.objects.first()
         self.assertContains(response, 'test comment')
@@ -235,8 +236,8 @@ class TestComments(TestCase):
         self.assertIsInstance(
             response.context['form'], CommentForm
         )
-        self.assertEqual(comment_one.post.author, self.post.author)
-        self.assertEqual(comment_one.post.text, self.post.text)
+        self.assertEqual(comment_one.author, self.user)
+        self.assertEqual(comment_one.text, data['text'])
         self.assertEqual(comment_one.post, self.post)
 
     def test_comment_noauthorized(self):
