@@ -239,7 +239,6 @@ class TestComments(TestCase):
         self.assertEqual(comment_one.post.text, self.post.text)
         self.assertEqual(comment_one.post, self.post)
 
-
     def test_comment_noauthorized(self):
         """Проверяем, что неавторизованный пользователь не может
         комментировать.

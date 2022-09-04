@@ -102,22 +102,20 @@ class StatusURLTests(TestCase):
             with self.subTest(args=args):
                 reverse_name = reverse(name, args=args)
                 redirect_to_login = reverse('users:login')
-                if name in (
-                    'posts:post_create',
-                    'posts:post_edit',
-                    'posts:add_comment',
-                    'posts:follow_index',
-                    'posts:profile_follow',
-                    'posts:profile_unfollow',
-                    ):
-                        response = self.client.get(reverse_name)
-                        self.assertEqual(
-                            response.status_code, HTTPStatus.FOUND
-                        )
-                        self.assertRedirects(
-                            response,
-                            f'{redirect_to_login}?next={reverse_name}'
-                        )
+                if name in ('posts:post_create',
+                            'posts:post_edit',
+                            'posts:add_comment',
+                            'posts:follow_index',
+                            'posts:profile_follow',
+                            'posts:profile_unfollow'):
+                    response = self.client.get(reverse_name)
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
+                    self.assertRedirects(
+                        response,
+                        f'{redirect_to_login}?next={reverse_name}'
+                    )
                 else:
                     response = self.client.get(reverse_name)
                     self.assertEqual(
@@ -190,13 +188,12 @@ class StatusURLTests(TestCase):
                     self.assertRedirects(
                         response, redirect_to_post_detail
                     )
-                elif name in (
-                    'posts:profile_follow','posts:profile_unfollow'
-                    ):
-                        response = self.not_author.get(reverse_name)
-                        self.assertEqual(
-                            response.status_code, HTTPStatus.FOUND
-                        )
+                elif name in ('posts:profile_follow',
+                              'posts:profile_unfollow'):
+                    response = self.not_author.get(reverse_name)
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
                 else:
                     response = self.not_author.get(reverse_name)
                     self.assertEqual(
