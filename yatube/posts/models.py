@@ -20,7 +20,7 @@ class CreatedModel(models.Model):
     class Meta:
         abstract = True
         ordering = ('-pub_date',)
-    
+
     def __str__(self) -> str:
         return self.text[:15]
 
