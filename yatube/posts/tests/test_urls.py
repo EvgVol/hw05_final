@@ -110,14 +110,14 @@ class StatusURLTests(TestCase):
                     'posts:profile_follow',
                     'posts:profile_unfollow',
                     ):
-                    response = self.client.get(reverse_name)
-                    self.assertEqual(
-                        response.status_code, HTTPStatus.FOUND
-                    )
-                    self.assertRedirects(
-                        response,
-                        f'{redirect_to_login}?next={reverse_name}'
-                    )
+                        response = self.client.get(reverse_name)
+                        self.assertEqual(
+                            response.status_code, HTTPStatus.FOUND
+                        )
+                        self.assertRedirects(
+                            response,
+                            f'{redirect_to_login}?next={reverse_name}'
+                        )
                 else:
                     response = self.client.get(reverse_name)
                     self.assertEqual(
@@ -191,13 +191,12 @@ class StatusURLTests(TestCase):
                         response, redirect_to_post_detail
                     )
                 elif name in (
-                    'posts:profile_follow',
-                    'posts:profile_unfollow'
+                    'posts:profile_follow','posts:profile_unfollow'
                     ):
-                    response = self.not_author.get(reverse_name)
-                    self.assertEqual(
-                        response.status_code, HTTPStatus.FOUND
-                    )
+                        response = self.not_author.get(reverse_name)
+                        self.assertEqual(
+                            response.status_code, HTTPStatus.FOUND
+                        )
                 else:
                     response = self.not_author.get(reverse_name)
                     self.assertEqual(

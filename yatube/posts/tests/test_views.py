@@ -45,7 +45,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(post.text, self.post.text)
         self.assertEqual(post.author, self.post.author)
         self.assertEqual(post.group, self.post.group)
-        self.assertEqual(post.pub_date, self.post.pub_date) 
+        self.assertEqual(post.pub_date, self.post.pub_date)
         self.assertEqual(post.id, self.post.id)
         self.assertEqual(post.image, self.post.image)
 
@@ -220,7 +220,6 @@ class TestComments(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-
     def test_comment_authorized(self):
         """Проверяем, что авторизованный пользователь может
         комментировать.
@@ -231,7 +230,6 @@ class TestComments(TestCase):
             {'text': 'test comment'},
             follow=True)
         comment_one = Comment.objects.first()
-        # comment_text = Comment.objects.all()[0].text
         self.assertContains(response, 'test comment')
         self.assertEqual(Comment.objects.count(), 1)
         self.assertIsInstance(
@@ -319,7 +317,6 @@ class TestFollow(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.follower)
-
 
     def test_follow(self):
         """Авторизованный пользователь может
