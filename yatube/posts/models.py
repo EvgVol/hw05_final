@@ -20,6 +20,9 @@ class CreatedModel(models.Model):
     class Meta:
         abstract = True
         ordering = ('-pub_date',)
+    
+    def __str__(self) -> str:
+        return self.text[:15]
 
 
 class Group(models.Model):
@@ -50,7 +53,6 @@ class Post(CreatedModel):
     group = models.ForeignKey(
         Group,
         on_delete=models.SET_NULL,
-        related_name='posts',
         blank=True,
         null=True,
         verbose_name='Группа',
@@ -70,9 +72,6 @@ class Post(CreatedModel):
         verbose_name_plural = 'Посты'
         default_related_name = 'posts'
 
-    def __str__(self) -> str:
-        return self.text[:15]
-
 
 class Comment(CreatedModel):
     """Параметры добавления новых комментариев."""
@@ -81,7 +80,6 @@ class Comment(CreatedModel):
         Post,
         on_delete=models.CASCADE,
         verbose_name='Пост',
-        related_name="comments"
     )
     text = models.TextField(
         'Комментарий',
@@ -97,13 +95,18 @@ class Comment(CreatedModel):
         return self.text
 
 
-class Follow(CreatedModel):
+class Follow(models.Model):
     """Параметры добавления новых подписок."""
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="follower"
+        related_name='follower'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор'
     )
 
     class Meta:

@@ -45,7 +45,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(post.text, self.post.text)
         self.assertEqual(post.author, self.post.author)
         self.assertEqual(post.group, self.post.group)
-        self.assertEqual(post.pub_date, self.post.pub_date)
+        self.assertEqual(post.pub_date, self.post.pub_date) 
         self.assertEqual(post.id, self.post.id)
         self.assertEqual(post.image, self.post.image)
 
@@ -144,18 +144,18 @@ class PaginatorViewsTest(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username='test_user')
         cls.author = User.objects.create_user(
-            username="test_username",
+            username="test_author",
         )
         cls.group = Group.objects.create(
             title='Заголовок для тестовой группы',
             slug='test_slug',
-            description='Тестовое описание'
+            description='Тестовое описание',
         )
         cls.posts = [
             Post(
                 text=f'Тестовый пост {post}',
                 author=cls.author,
-                group=cls.group
+                group=cls.group,
             )
             for post in range(POSTS_COUNT)
         ]
@@ -172,6 +172,7 @@ class PaginatorViewsTest(TestCase):
             ('posts:index', None),
             ('posts:group_list', (cls.group.slug,)),
             ('posts:profile', (cls.author.username,)),
+            ('posts:follow_index', None)
         )
         cls.lot_post = (
             ('?page=1', settings.CONST_TEN),
@@ -190,22 +191,12 @@ class PaginatorViewsTest(TestCase):
             with self.subTest(args=args):
                 for numder_page, count_posts in self.lot_post:
                     with self.subTest(numder_page=numder_page):
-                        response = self.client.get(
+                        response = self.follower_client.get(
                             reverse(name, args=args) + numder_page
                         )
                         self.assertEqual(
                             len(response.context.get('page_obj')
                                 .object_list), count_posts)
-
-        for num_page, count_posts in self.lot_post:
-            with self.subTest(num_page=num_page):
-                response = self.follower_client.get(
-                    reverse('posts:follow_index', None) + num_page
-                )
-                self.assertEqual(
-                    len(response.context.get('page_obj')
-                        .object_list), count_posts
-                )
 
 
 class TestComments(TestCase):
@@ -229,6 +220,7 @@ class TestComments(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
+
     def test_comment_authorized(self):
         """Проверяем, что авторизованный пользователь может
         комментировать.
@@ -238,19 +230,19 @@ class TestComments(TestCase):
             self.url_comment,
             {'text': 'test comment'},
             follow=True)
-        Comment.objects.first()
+        comment_one = Comment.objects.first()
+        # comment_text = Comment.objects.all()[0].text
         self.assertContains(response, 'test comment')
         self.assertEqual(Comment.objects.count(), 1)
         self.assertIsInstance(
-            response.context['comment'], CommentForm
+            response.context['form'], CommentForm
         )
-        self.assertIn('comment', response.context)
-        self.assertEqual(response.context['comment'], self.post)
-        self.assertEqual(response.context['text'], self.post)
-        self.assertEqual(response.context['author'], self.post)
-        self.assertEqual(response.context['post'], self.post)
+        self.assertEqual(comment_one.post.author, self.post.author)
+        self.assertEqual(comment_one.post.text, self.post.text)
+        self.assertEqual(comment_one.post, self.post)
 
-    def test_comment_authorized(self):
+
+    def test_comment_noauthorized(self):
         """Проверяем, что неавторизованный пользователь не может
         комментировать.
         """
@@ -328,6 +320,7 @@ class TestFollow(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.follower)
 
+
     def test_follow(self):
         """Авторизованный пользователь может
         подписываться на других пользователей.
@@ -374,11 +367,10 @@ class TestFollow(TestCase):
             author=self.user,
             text='Новый пост'
         )
-        self.authorized_client.get(reverse(
-            'posts:profile_follow', args=(self.user.username,)))
         response = self.authorized_client.get(reverse(
             'posts:follow_index')
         )
+        self.assertEqual(new_post, response.context['page_obj'][0])
         self.assertEqual(len(
             response.context.get('page_obj').object_list), 1
         )
@@ -390,19 +382,20 @@ class TestFollow(TestCase):
         """Новая запись пользователя не появляется в ленте
         не фаловера.
         """
-        Post.objects.all().delete
+        Post.objects.all().delete()
+        self.assertEqual(Post.objects.count(), 0)
         new_user = User.objects.create_user(
-            username='new_user'
+            username='New_user'
         )
         Post.objects.create(
             author=new_user,
-            text='Просто текст',
-            group=self.group)
-        response = self.authorized_client.get(
-            reverse('posts:follow_index')
+            text='Новый пост'
+        )
+        response = self.authorized_client.get(reverse(
+            'posts:follow_index')
         )
         self.assertEqual(len(
-            response.context.get('page_obj').object_list), 0
+            response.context['page_obj']), 0
         )
 
     def test_following_self(self):

@@ -22,30 +22,23 @@
         >
       </li>
       {% if user.is_authenticated %}
-      <li class="nav-item">
-        <a
-          class="nav-link {% if view_name == 'posts:post_create' %} active {% endif %}"
-          href="{% url 'posts:post_create' %}"
-          >Новая запись</a
-        >
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link link-light {% if view_name == 'users:password_reset' %} active {% endif %}"
-          href="{% url 'users:password_reset' %}"
-          >Изменить пароль</a
-        >
-      </li>
-      <li class="nav-item">
-        <a class="nav-link link-light" href="{% url 'users:logout' %}">Выйти</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link link-light" href="{% url 'posts:profile' user %}">Пользователь: {{ user.username }}</a>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #e3f2fd; color: blue;">
+          Пользователь: {{ user.username }}
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <li><a class="dropdown-item" href="{% url 'posts:profile' user %}">В профиль</a></li>
+          <li><a class="dropdown-item" href="{% url 'posts:post_create' %}">Новая запись</a></li>
+          <li><a class="dropdown-item" href="{% url 'users:password_reset' %}">Изменить пароль</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>
+        </ul>
       </li>
       {% else %}
       <li class="nav-item">
         <a
           class="nav-link link-light {% if view_name == 'users:login' %} active {% endif %}"
+          style="background-color: #e3f2fd; color: blue;"
           href="{% url 'users:login' %}"
           >Войти</a
         >
@@ -53,6 +46,7 @@
       <li class="nav-item">
         <a
           class="nav-link link-light {% if view_name == 'users:signup' %} active {% endif %}"
+          style="background-color: #e3f2fd; color: blue;"
           href="{% url 'users:signup' %}"
           >Регистрация</a
         >

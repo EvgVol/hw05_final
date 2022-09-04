@@ -29,7 +29,6 @@ class StatusURLTests(TestCase):
         cls.not_an_author = User.objects.create_user(
             username='No_author'
         )
-
         cls.all_pages = (
             (
                 'posts:index',
@@ -103,17 +102,14 @@ class StatusURLTests(TestCase):
             with self.subTest(args=args):
                 reverse_name = reverse(name, args=args)
                 redirect_to_login = reverse('users:login')
-                if name in ('posts:post_create', 'posts:post_edit'):
-                    response = self.client.get(reverse_name)
-                    self.assertEqual(
-                        response.status_code, HTTPStatus.FOUND
-                    )
-                    self.assertRedirects(
-                        response,
-                        f'{redirect_to_login}?next={reverse_name}'
-                    )
-                elif name == reverse(
-                        'posts:add_comment', args=(self.post.id)):
+                if name in (
+                    'posts:post_create',
+                    'posts:post_edit',
+                    'posts:add_comment',
+                    'posts:follow_index',
+                    'posts:profile_follow',
+                    'posts:profile_unfollow',
+                    ):
                     response = self.client.get(reverse_name)
                     self.assertEqual(
                         response.status_code, HTTPStatus.FOUND
@@ -128,25 +124,62 @@ class StatusURLTests(TestCase):
                         response.status_code, HTTPStatus.OK
                     )
 
-    def test_public_pages_for_guest_client(self):
-        """Все url-адресы доступен автору поста."""
+    def test_public_pages_for_author_post(self):
+        """Все url-адресы доступны автору поста."""
         for name, args, url in self.all_pages:
             with self.subTest(args=args):
-                response = self.authorized_client.get(
-                    reverse(name, args=args)
-                )
-                self.assertEqual(
-                    response.status_code, HTTPStatus.OK
-                )
+                reverse_name = reverse(name, args=args)
+                if name == 'posts:add_comment':
+                    response = self.authorized_client.get(
+                        reverse_name
+                    )
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
+                    self.assertRedirects(
+                        response,
+                        reverse(
+                            'posts:post_detail',
+                            args=(self.post.id,)
+                        )
+                    )
+                elif name == 'posts:profile_unfollow':
+                    response = self.authorized_client.get(
+                        reverse_name
+                    )
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.NOT_FOUND
+                    )
+                elif name == 'posts:profile_follow':
+                    response = self.authorized_client.get(
+                        reverse_name
+                    )
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.FOUND
+                    )
+                    self.assertRedirects(
+                        response,
+                        reverse(
+                            'posts:profile',
+                            args=(self.user.username,)
+                        )
+                    )
+                else:
+                    response = self.authorized_client.get(
+                        reverse_name
+                    )
+                    self.assertEqual(
+                        response.status_code, HTTPStatus.OK
+                    )
 
-    def test_public_pages_for_guest_client(self):
+    def test_pages_for_guest_client(self):
         """Все url-адрес|posts_edit доступен не автору поста
         c post_edit редирект на post_detail.
         """
         for name, args, url in self.all_pages:
             with self.subTest(args=args):
                 reverse_name = reverse(name, args=args)
-                if name == 'posts:post_edit':
+                if name in ('posts:post_edit', 'posts:add_comment'):
                     response = self.not_author.get(reverse_name)
                     self.assertEqual(
                         response.status_code, HTTPStatus.FOUND
@@ -157,17 +190,10 @@ class StatusURLTests(TestCase):
                     self.assertRedirects(
                         response, redirect_to_post_detail
                     )
-                elif name == 'posts:add_comment':
-                    response = self.not_author.get(reverse_name)
-                    self.assertEqual(
-                        response.status_code, HTTPStatus.FOUND
-                    )
-                elif name == 'posts:profile_follow':
-                    response = self.not_author.get(reverse_name)
-                    self.assertEqual(
-                        response.status_code, HTTPStatus.FOUND
-                    )
-                elif name == 'posts:profile_unfollow':
+                elif name in (
+                    'posts:profile_follow',
+                    'posts:profile_unfollow'
+                    ):
                     response = self.not_author.get(reverse_name)
                     self.assertEqual(
                         response.status_code, HTTPStatus.FOUND

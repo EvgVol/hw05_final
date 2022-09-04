@@ -59,6 +59,11 @@
           href="{% url 'posts:post_edit' post.pk %}">
             Редактировать
         </a>
+        <a 
+          class="btn btn-primary btn-danger"
+          href="{% url 'posts:post_delete' post.pk %}">
+            Удалить пост
+        </a>
       {% endif %}
       {% include 'posts/includes/comment_post.html' %}
     </article>

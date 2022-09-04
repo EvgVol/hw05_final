@@ -35,7 +35,7 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     post_list = author.posts.select_related('group').all()
     following = request.user.is_authenticated and (
-        author.following.exists()
+        author.following.select_related('username').exists()
     )
     context = {
         'author': author,
@@ -89,8 +89,8 @@ def post_delete(request, post_id):
     if request.user == post.author:
         post.delete()
     return redirect(
-        'profile:profile',
-        username=request.user
+        'posts:profile',
+        username=request.user.username
     )
 
 
@@ -149,8 +149,9 @@ def comment_delete(request, id):
 # страница follow --------------------------------------------------
 @login_required
 def follow_index(request):
-    authors = request.user.follower.values_list('author', flat=True)
-    post_list = Post.objects.filter(author__id__in=authors)
+    post_list = Post.objects.select_related('author').filter(
+        author__following__user=request.user
+    )
     context = {
         'page_obj': paginator_posts(request, post_list),
     }
@@ -173,6 +174,5 @@ def profile_follow(request, username):
 # Отписаться на автора----------------------------------------------
 @login_required
 def profile_unfollow(request, username):
-    get_object_or_404(User, username=username)
-    Follow.objects.filter(author__username=username).delete()
+    get_object_or_404(Follow, author__username=username).delete()
     return redirect('posts:profile', username=username)

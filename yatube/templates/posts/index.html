@@ -4,8 +4,7 @@
   <div class="container py-5">
     {% load cache %}
     <h1>Последние обновления на сайте</h1>
-    {% include 'posts/includes/paginator.html' %}
-    {% include 'posts/includes/switcher.html' %}
+    {% include 'posts/includes/switcher.html' with index=True  %}
     {% cache 30 sidebar index page_obj.number %}
       {% for post in page_obj %}
         {% include 'posts/includes/cart_posts.html' %}
